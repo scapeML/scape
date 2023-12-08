@@ -1,0 +1,33 @@
+[project]
+name = "scape"
+description = ""
+version = "0.1.0"
+authors = [
+    {name = "Pablo Rodriguez-Mier", email = "pablo.rodriguez.mier@gmail.com"},
+    {name = "Martin Garrido Rodriguez-Cordoba", email = "mgrcprof@gmail.com"}
+]
+requires-python = ">=3.9,<3.12"
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+    "tensorflow-io-gcs-filesystem>=0.31.0",
+    "tensorflow>=2.14.0",
+    "pandas>=1.5.3",
+    "scikit-learn>=1.2.2",
+    "fastparquet>=2023.10.1",
+]
+
+[tool.pdm.dev-dependencies]
+lint = [
+    "black>=23.11.0",
+    "flake8>=6.1.0",
+]
+test = [
+    "pytest>=7.4.3",
+]
+
+[tool.pdm.scripts]
+scape = {call = "scape.__main__:main"}
+
+[tool.pdm]
+excludes = ["notebooks/**"]
