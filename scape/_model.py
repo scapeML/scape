@@ -12,6 +12,7 @@ from keras.layers import (
 )
 import os
 import pandas as pd
+import pickle
 
 
 def _v(dfs):
@@ -37,7 +38,7 @@ class SCAPE:
         epochs=600,
         batch_size=128,
         output_folder=None,
-        model_output_file="model.h5",
+        model_output_file="model.keras",
         baselines=["zero"],
     ):
         if isinstance(output_data, str):
@@ -54,7 +55,6 @@ class SCAPE:
             self.setup["data_sources"],
             self.setup["feature_extraction"],
             data_source_index=data_source_index,
-            # data_source_columns=data_source_columns,
             join_on_index=[ix_train, ix_val],
         )
 
@@ -150,7 +150,60 @@ class SCAPE:
             "drugs": val_drugs,
             "cells": val_cells,
         }
+        if output_folder is not None:
+            model_file_name = model_output_file.split(".")[0]
+            result_file = f"{model_file_name}_result.pkl"
+            config_file = f"{model_file_name}_config.pkl"
+            with open(os.path.join(output_folder, result_file), "wb") as f:
+                pickle.dump(self._last_train_results, f)
+            with open(os.path.join(output_folder, config_file), "wb") as f:
+                pickle.dump(self.setup, f)
         return self._last_train_results
+
+    def generate_inputs(
+        self,
+        idx_targets,
+        names=["cell_type", "sm_name"],
+        source_index=None,
+        source_columns=None,
+    ):
+        idx = idx_targets
+        if isinstance(idx_targets, pd.DataFrame) or isinstance(idx_targets, pd.Series):
+            idx = idx_targets.index
+        elif isinstance(idx_targets, list):
+            idx = pd.MultiIndex.from_tuples(idx_targets, names=names)
+
+        feats = extract_features(
+            self.setup["data_sources"],
+            self.setup["feature_extraction"],
+            data_source_index=source_index,
+            data_source_columns=source_columns,
+            join_on_index=idx,
+        )
+        inputs = [
+            feats[self.setup["input_mapping"][name]] for name in self.model.input_names
+        ]
+        return inputs
+    
+    @staticmethod
+    def load(config_file, weights_file, results_file):
+        scm = None
+        with open(config_file, "rb") as f:
+            setup = pickle.load(f)
+            scm = SCAPE(setup)
+            scm.model.load_weights(weights_file)
+            with open(results_file, "rb") as f:
+                scm._last_train_results = pickle.load(f)
+            return scm
+
+    
+    def save(self, config_file, weights_file, results_file):
+        with open(config_file, "wb") as f:
+            pickle.dump(self.setup, f)
+        with open(results_file, "wb") as f:
+            pickle.dump(self._last_train_results, f)
+        self.model.save_weights(weights_file)
+
 
     def predict(
         self,
@@ -165,9 +218,13 @@ class SCAPE:
         if isinstance(idx_targets, pd.DataFrame) or isinstance(idx_targets, pd.Series):
             idx = idx_targets.index
         elif isinstance(idx_targets, list):
-            n = self._last_train_results["data_source_index"].names if idx_target_names is None else idx_target_names
+            n = (
+                self._last_train_results["data_source_index"].names
+                if idx_target_names is None
+                else idx_target_names
+            )
             idx = pd.MultiIndex.from_tuples(idx_targets, names=n)
-        
+
         feats = extract_features(
             self.setup["data_sources"],
             self.setup["feature_extraction"],
@@ -188,13 +245,13 @@ class SCAPE:
         return preds
 
 
-def checkpoint(filepath, monitor="val_mrrmse"):
+def checkpoint(filepath, monitor="val_loss"):
     checkpoint = keras.callbacks.ModelCheckpoint(
         filepath=filepath,
         monitor=monitor,
         verbose=0,
         save_best_only=True,
-        save_weights_only=False,
+        save_weights_only=True,
         mode="min",
     )
     return checkpoint
