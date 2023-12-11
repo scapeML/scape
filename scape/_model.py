@@ -38,7 +38,9 @@ class SCAPE:
         epochs=600,
         batch_size=128,
         output_folder=None,
-        model_output_file="model.keras",
+        model_file_name="model.keras",
+        result_file_name=None,
+        config_file_name=None,
         baselines=["zero"],
     ):
         if isinstance(output_data, str):
@@ -108,10 +110,10 @@ class SCAPE:
             if output_folder is not None:
                 if not os.path.exists(output_folder):
                     os.makedirs(output_folder)
-                model_file = os.path.join(output_folder, model_output_file)
+                model_file = os.path.join(output_folder, model_file_name)
                 if os.path.exists(model_file):
                     raise ValueError(f"Model file {model_file} already exists.")
-                model_filepath = os.path.join(output_folder, model_output_file)
+                model_filepath = os.path.join(output_folder, model_file_name)
                 print(f"Model will be saved to {model_filepath}")
                 callback_list.append(checkpoint(model_filepath))
             monitor_callback = MonitorCallback(
@@ -146,14 +148,22 @@ class SCAPE:
             "data_source_columns": data_source_columns,
             "baselines": _baselines,
             "input_names": self.model.input_names,
-            "model_file": model_output_file,
+            "model_file": model_file_name,
             "drugs": val_drugs,
             "cells": val_cells,
         }
         if output_folder is not None:
-            model_file_name = model_output_file.split(".")[0]
-            result_file = f"{model_file_name}_result.pkl"
-            config_file = f"{model_file_name}_config.pkl"
+            model_file_name = model_file_name.split(".")[0]
+            result_file = (
+                f"{model_file_name}_result.pkl"
+                if result_file_name is None
+                else result_file_name
+            )
+            config_file = (
+                f"{model_file_name}_config.pkl"
+                if config_file_name is None
+                else config_file_name
+            )
             with open(os.path.join(output_folder, result_file), "wb") as f:
                 pickle.dump(self._last_train_results, f)
             with open(os.path.join(output_folder, config_file), "wb") as f:
@@ -184,7 +194,7 @@ class SCAPE:
             feats[self.setup["input_mapping"][name]] for name in self.model.input_names
         ]
         return inputs
-    
+
     @staticmethod
     def load(config_file, weights_file, results_file):
         scm = None
@@ -196,14 +206,12 @@ class SCAPE:
                 scm._last_train_results = pickle.load(f)
             return scm
 
-    
     def save(self, config_file, weights_file, results_file):
         with open(config_file, "wb") as f:
             pickle.dump(self.setup, f)
         with open(results_file, "wb") as f:
             pickle.dump(self._last_train_results, f)
         self.model.save_weights(weights_file)
-
 
     def predict(
         self,
@@ -527,3 +535,80 @@ def predict(idx_targets, models, as_df=True, output_idx=0):
             for p in predictions
         ]
     return predictions
+
+
+def create_default_model(n_genes, df_de, df_lfc):
+    # Data sources point to the dataframes with the data from which the features are extracted
+    data_sources = {"slogpval": df_de, "lfc_pseudo": df_lfc}
+
+    # Define the way in which the features are extracted from the data sources
+    feature_extraction = {
+        "slogpval_drug": {
+            "source": "slogpval",
+            "groupby": "sm_name",
+            "function": "median",
+        },
+        "lfc_drug": {
+            "source": "lfc_pseudo",
+            "groupby": "sm_name",
+            "function": "median",
+        },
+        "slogpval_cell": {
+            "source": "slogpval",
+            "groupby": "cell_type",
+            "function": "median",
+        },
+        "lfc_cell": {
+            "source": "lfc_pseudo",
+            "groupby": "cell_type",
+            "function": "median",
+        },
+    }
+
+    # Names of the input layers -> feature extraction method
+    input_mapping = {
+        "in_slogpval_drug": "slogpval_drug",
+        "in_lfc_drug": "lfc_drug",
+        "in_slogpval_cell_encoder": "slogpval_cell",
+        "in_lfc_cell_encoder": "lfc_cell",
+        "in_slogpval_cell_decoder": "slogpval_cell",
+        "in_lfc_cell_decoder": "lfc_cell",
+    }
+
+    # Configuration for the NN architecture
+    config = {
+        "inputs": {
+            "in_slogpval_drug": [n_genes, 256, 128],
+            "in_lfc_drug": [n_genes, 256, 128],
+        },
+        "conditional_encoder_input_structure": {
+            "in_slogpval_cell_encoder": [n_genes, 32],
+            "in_lfc_cell_encoder": [n_genes, 32, 16],
+        },
+        "conditional_decoder_input_structure": {
+            "in_slogpval_cell_decoder": [n_genes, 32],
+            "in_lfc_cell_decoder": [n_genes, 32, 16],
+        },
+        "conditional_decoder_input_hidden_sizes": [32],
+        "encoder_hidden_layer_sizes": [128, 128],
+        "decoder_hidden_layer_sizes": [128, 512],
+        "outputs": {
+            "logpval": (df_de.shape[1], "linear"),
+        },
+        # Layer config
+        "noise": 0.01,
+        "dropout": 0.05,
+        "l1": 0,
+        "l2": 0,
+    }
+
+    model_setup = {
+        "data_sources": data_sources,
+        "feature_extraction": feature_extraction,
+        "input_mapping": input_mapping,
+        "output_genes": df_de.columns,
+        "config": config,
+    }
+
+    # Create model
+    return SCAPE(model_setup)
