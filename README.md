@@ -7,6 +7,9 @@ ScAPE: Single-cell Analysis of Perturbational Effects
 </h1>
 </p>
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-o_lT-ttoKS-nbozj2RQusGoi-vm0-XL?usp=sharing)
+
+
 ScAPE is a package implementing the neural network model used in the _Open Problems – Single-Cell Perturbations challenge_ hosted by Kaggle. This is the model we used to generate the submission that achieved top <2% performance (16th position out of 1097 teams) in the [final leaderboard](https://www.kaggle.com/competitions/open-problems-single-cell-perturbations/leaderboard).
 
 ## Description
@@ -63,9 +66,12 @@ python -m scape train --n-genes 64 --cv-drug Belinostat --output-dir models de_t
 
 The method `scape.util.plot_result(result, legend=True)` can be used to plot the CV results after training a model, as shown in the [quick-start notebook](https://github.com/scapeML/scape/blob/main/docs/notebooks/quick-start.ipynb). The following figure shows an example of the output of this method:
 
+<p align="center">
 <picture>
-  <img alt="description" src="docs/assets/example-nk-prednisolone.png" height="300">
+  <img alt="prednisolone-cv-nk" src="docs/assets/example-nk-prednisolone.png" height="400">
 </picture>
+</p>
+
 
 The plot shows two different baselines. The top dotted line shows the performance of a model that always predicts 0s, as the one used as baseline in the Kaggle challenge. The bottom dotted line shows the performance of a model that always predicts the median of the training data (grouped by drug type). This baseline is useful to compare the performance of the model with a simple model that does not learn anything. The solid line indicates the best validation error.
 
