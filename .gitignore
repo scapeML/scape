@@ -162,8 +162,8 @@ cython_debug/
 #.idea/
 
 .keras
-_models
-_data
+_*/
+
 
 # Ignore notebooks ipynb starting with "_"
 _*.ipynb

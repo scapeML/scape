@@ -1,0 +1,5 @@
+tensorflow~=2.14.0
+tensorflow-io-gcs-filesystem>=0.31.0
+pandas~=1.5.3
+scikit-learn~=1.2.2
+fastparquet~=2023.10.1

@@ -1,6 +1,6 @@
 from tensorflow import keras
 from scape._losses import mrrmse, np_mrrmse
-from scape._util import extract_features, split_data, select_top_variable
+from scape._util import extract_features, split_data
 from scape._callbacks import MonitorCallback
 from keras.layers import (
     Input,
@@ -20,6 +20,42 @@ def _v(dfs):
 
 
 class SCAPE:
+    """
+    A class to encapsulate functionalities for model training, evaluation, and prediction.
+
+    Attributes
+    ----------
+    setup : dict
+        A dictionary containing configuration and setup data.
+    config : dict
+        A subset of the `setup` dictionary, containing model-specific configurations.
+    model : keras.Model
+        The neural network model defined as per the given configuration.
+    _last_train_results : dict, optional
+        A dictionary storing the results from the last training session.
+
+    Methods
+    -------
+    train(val_cells=None, val_drugs=None, input_columns=None, output_data="slogpval",
+          callbacks="default", optimizer=None, epochs=600, batch_size=128,
+          output_folder=None, model_file_name="model.keras", result_file_name=None,
+          config_file_name=None, baselines=["zero"])
+        Trains the model with the provided parameters and data.
+
+    generate_inputs(idx_targets, names=["cell_type", "sm_name"], source_index=None,
+                    source_columns=None)
+        Generates input data for the model prediction from the given indices.
+
+    load(config_file, weights_file, results_file)
+        Static method to load a trained model from files.
+
+    save(config_file, weights_file, results_file)
+        Saves the model configuration, weights, and training results to files.
+
+    predict(idx_targets, as_df=True, output_idx=0, idx_target_names=None)
+        Predicts outputs using the model for the provided target indices.
+    """
+
     def __init__(self, setup):
         self.setup = setup
         self.config = setup["config"]
@@ -43,6 +79,43 @@ class SCAPE:
         config_file_name=None,
         baselines=["zero"],
     ):
+        """
+        Trains the model based on the provided parameters and data.
+
+        Parameters
+        ----------
+        val_cells : array-like, optional
+            Validation data for cell lines.
+        val_drugs : array-like, optional
+            Validation data for drugs.
+        input_columns : list of str, optional
+            Specific columns to be used as input features.
+        output_data : str, optional
+            The key for the output data in the setup dictionary.
+        callbacks : list of keras.callbacks.Callback or str, optional
+            Callbacks to use during training. If 'default', uses predefined callbacks.
+        optimizer : keras.optimizers.Optimizer, optional
+            The optimizer to use for training.
+        epochs : int, optional
+            Number of epochs to train the model.
+        batch_size : int, optional
+            Size of the batches used in the training process.
+        output_folder : str, optional
+            Directory where to save the model and results.
+        model_file_name : str, optional
+            File name to save the trained model.
+        result_file_name : str, optional
+            File name to save training results.
+        config_file_name : str, optional
+            File name to save the model configuration.
+        baselines : list of str, optional
+            List of baseline methods to compare the model's performance against.
+
+        Returns
+        -------
+        dict
+            A dictionary containing training results and model information.
+        """
         if isinstance(output_data, str):
             output_data = self.setup["data_sources"][output_data]
         input_mapping = self.setup["input_mapping"]
@@ -177,6 +250,31 @@ class SCAPE:
         source_index=None,
         source_columns=None,
     ):
+        """
+        Generates input data for the model prediction from the given indices.
+
+        This method prepares the input features for prediction based on specified indices,
+        using data source configurations and mappings defined in the setup.
+
+        Parameters
+        ----------
+        idx_targets : array-like, pandas.DataFrame, pandas.Series, or list
+            The target indices for which to generate inputs. Can be an array, a DataFrame,
+            a Series, or a list of tuples.
+        names : list of str, optional
+            Names for the indices, used when `idx_targets` is a list of tuples.
+            Defaults to ["cell_type", "sm_name"].
+        source_index : pandas.Index or None, optional
+            The index of the data source to use. If None, uses the entire data source.
+        source_columns : list of str or None, optional
+            Specific columns to be used for generating inputs. If None, uses all columns.
+
+        Returns
+        -------
+        list
+            A list of numpy arrays corresponding to the inputs for the model, structured
+            according to the model's input names and the mapping defined in the setup.
+        """
         idx = idx_targets
         if isinstance(idx_targets, pd.DataFrame) or isinstance(idx_targets, pd.Series):
             idx = idx_targets.index
@@ -197,6 +295,32 @@ class SCAPE:
 
     @staticmethod
     def load(config_file, weights_file, results_file):
+        """
+        Loads a trained model along with its configuration and results from specified files.
+
+        This static method is used to instantiate a `SCAPE` object from a saved configuration,
+        including the model's weights and training results. It is useful for resuming work
+        with a previously trained model without needing to retrain from scratch.
+
+        Parameters
+        ----------
+        config_file : str
+            The path to the file containing the model's configuration data.
+        weights_file : str
+            The path to the file containing the model's trained weights.
+        results_file : str
+            The path to the file containing the results from the model's training process.
+
+        Returns
+        -------
+        SCAPE
+            A `SCAPE` object instantiated with the loaded configuration, weights, and training results.
+
+        Raises
+        ------
+        IOError
+            If any of the specified files cannot be read or are not found.
+        """
         scm = None
         with open(config_file, "rb") as f:
             setup = pickle.load(f)
@@ -207,6 +331,27 @@ class SCAPE:
             return scm
 
     def save(self, config_file, weights_file, results_file):
+        """
+        Saves the model configuration, weights, and training results to files.
+
+        This method enables the preservation of the current state of the model,
+        including its configuration, trained weights, and results of the training.
+        It facilitates reloading the model state for future use or analysis.
+
+        Parameters
+        ----------
+        config_file : str
+            The file path where the model's configuration will be saved.
+        weights_file : str
+            The file path where the model's weights will be saved.
+        results_file : str
+            The file path where the training results will be saved.
+
+        Notes
+        -----
+        The method uses Python's pickle module to serialize the data into files.
+        Ensure that the provided file paths are accessible and writable.
+        """
         with open(config_file, "wb") as f:
             pickle.dump(self.setup, f)
         with open(results_file, "wb") as f:
@@ -220,6 +365,42 @@ class SCAPE:
         output_idx=0,
         idx_target_names=None,
     ):
+        """
+        Predicts outputs using the model for the provided target indices.
+
+        This method applies the trained model to generate predictions for specified target
+        indices. It can return the results as a pandas DataFrame or as a numpy array, based
+        on the `as_df` parameter.
+
+        Parameters
+        ----------
+        idx_targets : array-like, pandas.DataFrame, pandas.Series, or list
+            The indices for which predictions are required. Can be in various formats including
+            an array, DataFrame, Series, or a list of tuples.
+        as_df : bool, optional
+            If True, returns the predictions as a pandas DataFrame. If False, returns predictions
+            as a numpy array. Default is True.
+        output_idx : int, optional
+            The index of the output to return, in case the model has multiple outputs. Default is 0.
+        idx_target_names : list of str, optional
+            Names for the target indices, used when `idx_targets` is a list of tuples. If None, 
+            uses names from the training data's source index.
+
+        Returns
+        -------
+        pandas.DataFrame or numpy.ndarray
+            The predicted values. The format depends on the `as_df` parameter.
+
+        Raises
+        ------
+        ValueError
+            If no model has been trained yet, or if an invalid `output_idx` is provided.
+
+        Notes
+        -----
+        The method assumes that the model and the necessary data processing steps are already 
+        properly set up and trained.
+        """
         if self._last_train_results is None:
             raise ValueError("No model trained yet.")
         idx = idx_targets
@@ -435,50 +616,7 @@ def load_model(filepath, custom_objects={"mrrmse": mrrmse}):
     return keras.models.load_model(filepath, custom_objects=custom_objects)
 
 
-def load_models(
-    model_folder,
-    custom_objects={"regularized_mrrmse": None, "mrrmse": None},
-    lazy=False,
-):
-    import pickle
-
-    with open(os.path.join(model_folder, "config.pkl"), "rb") as f:
-        config = pickle.load(f)
-    with open(os.path.join(model_folder, "model_data.pkl"), "rb") as f:
-        data = pickle.load(f)
-    # Check if there is a results.pkl file
-    results_file = os.path.join(model_folder, "results.pkl")
-    if not os.path.exists(results_file):
-        # Get a list of all files being "result_*.pkl"
-        results = []
-        for f in os.listdir(model_folder):
-            if f.startswith("result_") and f.endswith(".pkl"):
-                with open(os.path.join(model_folder, f), "rb") as f2:
-                    results.append(pickle.load(f2))
-    else:
-        with open(results_file, "rb") as f:
-            results = pickle.load(f)
-    if lazy:
-
-        def lazy_model_loader():
-            for r in results:
-                path = os.path.join(model_folder, r["model_file"])
-                print(f"Loading model {path}")
-                yield load_model(path, custom_objects=custom_objects)
-
-        models = lazy_model_loader()
-    else:
-        models = []
-        for r in results:
-            path = os.path.join(model_folder, r["model_file"])
-            print(f"Loading model {path}")
-            models.append(load_model(path, custom_objects=custom_objects))
-    return dict(
-        config=config, results=results, data=data, models=models, folder=model_folder
-    )
-
-
-def create_model(config: dict):
+def create_model(config):
     noise = config.get("noise", 0.0)
     dropout = config.get("dropout", 0.0)
     l1 = config.get("l1", 0.0)
