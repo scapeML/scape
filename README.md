@@ -93,8 +93,7 @@ For example, in the figure above, the trained model is 25.31% better than the ba
 
 Prior to the refactor and creation of the ScAPE package, we used a simplified version of the model to explore different questions and to do hyperparameter tuning. The notebook used to generate the final report can be found in the following link:
 
-- https://docs.google.com/document/d/1w0GIJ8VoQx3HEJNmLXoU-Y_STB-h5-bXusL80_6EVuU/edit?usp=sharing
-
+- https://github.com/scapeML/scape/blob/main/docs/report.pdf
 
 
 ## Reproducibility
