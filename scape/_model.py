@@ -383,7 +383,7 @@ class SCAPE:
         output_idx : int, optional
             The index of the output to return, in case the model has multiple outputs. Default is 0.
         idx_target_names : list of str, optional
-            Names for the target indices, used when `idx_targets` is a list of tuples. If None, 
+            Names for the target indices, used when `idx_targets` is a list of tuples. If None,
             uses names from the training data's source index.
 
         Returns
@@ -398,7 +398,7 @@ class SCAPE:
 
         Notes
         -----
-        The method assumes that the model and the necessary data processing steps are already 
+        The method assumes that the model and the necessary data processing steps are already
         properly set up and trained.
         """
         if self._last_train_results is None:
