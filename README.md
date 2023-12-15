@@ -20,7 +20,7 @@ Similar to most problems in biological research via omics data, we encountered a
 
 <p align="center">
 <picture>
-  <img alt="description" src="docs/assets/nn-architecture.png" style="max-width: 100%; height: auto;" height="400">
+  <img alt="description" src="docs/assets/nn-architecture.png" width="720" style="max-width: 100%; height: auto;">
 </picture>
 <p align="center" margin=0px>
 Neural network architecture used for the challenge (ScAPE model).
@@ -68,7 +68,7 @@ The method `scape.util.plot_result(result, legend=True)` can be used to plot the
 
 <p align="center">
 <picture>
-  <img alt="prednisolone-cv-nk" src="docs/assets/example-nk-prednisolone.png" style="max-width: 100%; height: auto;" height="400">
+  <img alt="prednisolone-cv-nk" src="docs/assets/example-nk-prednisolone.png" width="720" style="max-width: 100%; height: auto;">
 </picture>
 </p>
 
