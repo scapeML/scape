@@ -1,7 +1,7 @@
 <p align="center">
-<picture>
+<p align="center">
   <img alt="logo" src="https://raw.githubusercontent.com/scapeML/scape/main/docs/assets/logo.png" height="200">
-</picture>
+</p>
 <h1 align="center" margin=0px>
 ScAPE: Single-cell Analysis of Perturbational Effects
 </h1>
@@ -19,9 +19,9 @@ In this Kaggle competition, the main objective was to predict the effect of drug
 Similar to most problems in biological research via omics data, we encountered a high-dimensional feature space (~18k genes) and a low-dimensional observation space (~614 cell/drug combinations) with a low signal-to-noise ratio, where most of the genes show random fluctuations after perturbation. The main data modality to be predicted consisted of signed and log-transformed P-values from differential expression (DE) analysis. In the DE analysis, pseudo-bulk expression profiles from drug-treated cells were compared against the profiles of cells treated with Dimethyl Sulfoxide (DMSO). 
 
 <p align="center">
-<picture>
+<p align="center">
   <img alt="description" src="docs/assets/nn-architecture.png" width="720" style="max-width: 100%; height: auto;">
-</picture>
+</p>
 <p align="center" margin=0px>
 Neural network architecture used for the challenge (ScAPE model).
 </p>
@@ -67,9 +67,7 @@ python -m scape train --n-genes 64 --cv-drug Belinostat --output-dir models de_t
 The method `scape.util.plot_result(result, legend=True)` can be used to plot the CV results after training a model, as shown in the [quick-start notebook](https://github.com/scapeML/scape/blob/main/docs/notebooks/quick-start.ipynb). The following figure shows an example of the output of this method:
 
 <p align="center">
-<picture>
   <img alt="prednisolone-cv-nk" src="docs/assets/example-nk-prednisolone.png" width="720" style="max-width: 100%; height: auto;">
-</picture>
 </p>
 
 
