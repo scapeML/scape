@@ -1,6 +1,6 @@
 <p align="center">
 <picture>
-  <img alt="logo" src="docs/assets/logo.png" height="200">
+  <img alt="logo" src="https://raw.githubusercontent.com/scapeML/scape/main/docs/assets/logo.png" height="200">
 </picture>
 <h1 align="center" margin=0px>
 ScAPE: Single-cell Analysis of Perturbational Effects
