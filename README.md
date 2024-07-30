@@ -9,8 +9,7 @@ ScAPE: Single-cell Analysis of Perturbational Effects
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-o_lT-ttoKS-nbozj2RQusGoi-vm0-XL?usp=sharing)
 
-
-ScAPE is a package implementing the neural network model used in the _Open Problems – Single-Cell Perturbations challenge_ hosted by Kaggle. This is the model we used to generate the submission that achieved top <2% performance (16th position out of 1097 teams) in the [final leaderboard](https://www.kaggle.com/competitions/open-problems-single-cell-perturbations/leaderboard).
+ScAPE is a package implementing the neural network model used in the _Open Problems – Single-Cell Perturbations challenge_, part of the NeurIPS 2023 Competition Track, hosted by Kaggle. The model won one of the $10,000 Judges' Prizes and achieved top 2% performance on the final [test set](https://www.kaggle.com/competitions/open-problems-single-cell-perturbations/leaderboard) (16th position out of 1097 teams).
 
 ## Description
 
