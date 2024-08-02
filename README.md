@@ -42,7 +42,7 @@ pip install git+https://github.com/scapeML/scape.git
 
 In addition to the data provided by the challenge, we estimated log fold changes from pseudobulk data that we used as additional features. All the data, including the files from the challenge, can be downloaded from the following link:
 
-- https://e.pcloud.link/publink/show?code=XZAvz1ZtQRREhpX4KFIsMeurkJdYztbFPSX
+- https://zenodo.org/records/10617221
 
 ## Usage
 
