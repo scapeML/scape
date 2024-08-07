@@ -98,3 +98,14 @@ Prior to the refactor and creation of the ScAPE package, we used a simplified ve
 The following notebook can be used to reproduce the results of our submission: https://github.com/scapeML/scape/blob/main/docs/notebooks/solution.ipynb.
 
 In addition, we've created a [Google Colab](https://colab.research.google.com/drive/1-o_lT-ttoKS-nbozj2RQusGoi-vm0-XL?usp=sharing) notebook showing how to install, train and predict using the ScAPE package.
+
+## Citation
+
+```
+@misc{rodriguezmier24scape,
+  author       = {Rodriguez-Mier, Pablo and Garrido-Rodriguez, Martin},
+  title        = {ScAPE: Single-cell Analysis of Perturbational Effects},
+  year         = {2024},
+  url          = {https://github.com/scapeML/scape}
+}
+```
