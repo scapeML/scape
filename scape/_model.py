@@ -1,4 +1,5 @@
-from tensorflow import keras
+#from tensorflow import keras
+import keras
 from scape._losses import mrrmse, np_mrrmse
 from scape._util import extract_features, split_data
 from scape._callbacks import MonitorCallback
