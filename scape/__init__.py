@@ -4,4 +4,4 @@ import scape._io as io
 import scape._util as util
 from scape._model import SCAPE
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
