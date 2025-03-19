@@ -550,6 +550,8 @@ def decoder(
     l1=0.0,
     l2=0.0,
 ):
+    if not isinstance(enc_input_shape, tuple):
+        enc_input_shape = (enc_input_shape,)
     enc_input = Input(shape=enc_input_shape, name=enc_input_name)
     conditional_input_processors = {}
     if conditional_input_structure is not None:
