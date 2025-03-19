@@ -1,7 +1,7 @@
 [project]
 name = "scape"
 description = ""
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     { name = "Pablo Rodriguez-Mier", email = "pablo.rodriguez.mier@gmail.com" },
     { name = "Martin Garrido Rodriguez-Cordoba", email = "mgrcprof@gmail.com" },
