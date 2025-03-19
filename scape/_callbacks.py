@@ -10,7 +10,12 @@ class StepwiseScheduler(keras.callbacks.Callback):
         self.verbose = verbose
 
     def on_epoch_end(self, epoch, logs=None):
-        v = K.get_value(self.reg_penalty)
+        v_obj = self.reg_penalty
+        try:
+            v = float(v_obj.numpy())
+        except AttributeError:
+            v = float(v_obj)
+
         vn = self.dict_epoch_values.get(epoch, v)
         if v != vn and self.verbose > 0:
             print(f"\tValue changed from {v} to {vn}")
@@ -36,7 +41,13 @@ class MonitorCallback(keras.callbacks.Callback):
         current = logs.get(self.monitor)
         if current is None:
             return
-        lr = float(K.get_value(self.model.optimizer.learning_rate))
+        lr_obj = self.model.optimizer.learning_rate
+        # If lr_obj is a tensor/variable, get its value via .numpy(), otherwise assume it's already numeric.
+        try:
+            lr = float(lr_obj.numpy())
+        except AttributeError:
+            lr = float(lr_obj)
+        #lr = float(K.get_value(self.model.optimizer.learning_rate))
 
         if self.best is None or current < self.best:
             # Get the train error:

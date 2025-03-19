@@ -33,27 +33,6 @@ class SCAPE:
         The neural network model defined as per the given configuration.
     _last_train_results : dict, optional
         A dictionary storing the results from the last training session.
-
-    Methods
-    -------
-    train(val_cells=None, val_drugs=None, input_columns=None, output_data="slogpval",
-          callbacks="default", optimizer=None, epochs=600, batch_size=128,
-          output_folder=None, model_file_name="model.keras", result_file_name=None,
-          config_file_name=None, baselines=["zero"])
-        Trains the model with the provided parameters and data.
-
-    generate_inputs(idx_targets, names=["cell_type", "sm_name"], source_index=None,
-                    source_columns=None)
-        Generates input data for the model prediction from the given indices.
-
-    load(config_file, weights_file, results_file)
-        Static method to load a trained model from files.
-
-    save(config_file, weights_file, results_file)
-        Saves the model configuration, weights, and training results to files.
-
-    predict(idx_targets, as_df=True, output_idx=0, idx_target_names=None)
-        Predicts outputs using the model for the provided target indices.
     """
 
     def __init__(self, setup):
@@ -81,40 +60,6 @@ class SCAPE:
     ):
         """
         Trains the model based on the provided parameters and data.
-
-        Parameters
-        ----------
-        val_cells : array-like, optional
-            Validation data for cell lines.
-        val_drugs : array-like, optional
-            Validation data for drugs.
-        input_columns : list of str, optional
-            Specific columns to be used as input features.
-        output_data : str, optional
-            The key for the output data in the setup dictionary.
-        callbacks : list of keras.callbacks.Callback or str, optional
-            Callbacks to use during training. If 'default', uses predefined callbacks.
-        optimizer : keras.optimizers.Optimizer, optional
-            The optimizer to use for training.
-        epochs : int, optional
-            Number of epochs to train the model.
-        batch_size : int, optional
-            Size of the batches used in the training process.
-        output_folder : str, optional
-            Directory where to save the model and results.
-        model_file_name : str, optional
-            File name to save the trained model.
-        result_file_name : str, optional
-            File name to save training results.
-        config_file_name : str, optional
-            File name to save the model configuration.
-        baselines : list of str, optional
-            List of baseline methods to compare the model's performance against.
-
-        Returns
-        -------
-        dict
-            A dictionary containing training results and model information.
         """
         if isinstance(output_data, str):
             output_data = self.setup["data_sources"][output_data]
@@ -151,18 +96,17 @@ class SCAPE:
             optimizer = keras.optimizers.RMSprop(learning_rate=0.005)
 
         self.model.compile(optimizer=optimizer, loss=mrrmse)
-        # Print model input names:
-        print("Model inputs:", self.model.input_names)
 
-        # Get train inputs from features, using the order and names of the inputs of the model
-        # and the mapping between inputs and features
+        # Use input names from the setup's input mapping (since model.input_names is not available)
+        input_names = list(self.setup["input_mapping"].keys())
+        print("Model inputs:", input_names)
+
+        # Get train inputs from features, using the order and names from the input mapping
         train_inputs = [
-            feats_train[input_mapping[k]].loc[:, data_source_columns]
-            for k in self.model.input_names
+            feats_train[input_mapping[k]].loc[:, data_source_columns] for k in input_names
         ]
         val_inputs = [
-            feats_val[input_mapping[k]].loc[:, data_source_columns]
-            for k in self.model.input_names
+            feats_val[input_mapping[k]].loc[:, data_source_columns] for k in input_names
         ]
         train_outputs = [Y_train]
         val_outputs = [Y_val]
@@ -220,7 +164,7 @@ class SCAPE:
             "data_source_index": data_source_index,
             "data_source_columns": data_source_columns,
             "baselines": _baselines,
-            "input_names": self.model.input_names,
+            "input_names": input_names,
             "model_file": model_file_name,
             "drugs": val_drugs,
             "cells": val_cells,
@@ -252,28 +196,6 @@ class SCAPE:
     ):
         """
         Generates input data for the model prediction from the given indices.
-
-        This method prepares the input features for prediction based on specified indices,
-        using data source configurations and mappings defined in the setup.
-
-        Parameters
-        ----------
-        idx_targets : array-like, pandas.DataFrame, pandas.Series, or list
-            The target indices for which to generate inputs. Can be an array, a DataFrame,
-            a Series, or a list of tuples.
-        names : list of str, optional
-            Names for the indices, used when `idx_targets` is a list of tuples.
-            Defaults to ["cell_type", "sm_name"].
-        source_index : pandas.Index or None, optional
-            The index of the data source to use. If None, uses the entire data source.
-        source_columns : list of str or None, optional
-            Specific columns to be used for generating inputs. If None, uses all columns.
-
-        Returns
-        -------
-        list
-            A list of numpy arrays corresponding to the inputs for the model, structured
-            according to the model's input names and the mapping defined in the setup.
         """
         idx = idx_targets
         if isinstance(idx_targets, pd.DataFrame) or isinstance(idx_targets, pd.Series):
@@ -288,38 +210,14 @@ class SCAPE:
             data_source_columns=source_columns,
             join_on_index=idx,
         )
-        inputs = [
-            feats[self.setup["input_mapping"][name]] for name in self.model.input_names
-        ]
+        input_names = list(self.setup["input_mapping"].keys())
+        inputs = [feats[self.setup["input_mapping"][name]] for name in input_names]
         return inputs
 
     @staticmethod
     def load(config_file, weights_file, results_file):
         """
         Loads a trained model along with its configuration and results from specified files.
-
-        This static method is used to instantiate a `SCAPE` object from a saved configuration,
-        including the model's weights and training results. It is useful for resuming work
-        with a previously trained model without needing to retrain from scratch.
-
-        Parameters
-        ----------
-        config_file : str
-            The path to the file containing the model's configuration data.
-        weights_file : str
-            The path to the file containing the model's trained weights.
-        results_file : str
-            The path to the file containing the results from the model's training process.
-
-        Returns
-        -------
-        SCAPE
-            A `SCAPE` object instantiated with the loaded configuration, weights, and training results.
-
-        Raises
-        ------
-        IOError
-            If any of the specified files cannot be read or are not found.
         """
         scm = None
         with open(config_file, "rb") as f:
@@ -333,24 +231,6 @@ class SCAPE:
     def save(self, config_file, weights_file, results_file):
         """
         Saves the model configuration, weights, and training results to files.
-
-        This method enables the preservation of the current state of the model,
-        including its configuration, trained weights, and results of the training.
-        It facilitates reloading the model state for future use or analysis.
-
-        Parameters
-        ----------
-        config_file : str
-            The file path where the model's configuration will be saved.
-        weights_file : str
-            The file path where the model's weights will be saved.
-        results_file : str
-            The file path where the training results will be saved.
-
-        Notes
-        -----
-        The method uses Python's pickle module to serialize the data into files.
-        Ensure that the provided file paths are accessible and writable.
         """
         with open(config_file, "wb") as f:
             pickle.dump(self.setup, f)
@@ -367,39 +247,6 @@ class SCAPE:
     ):
         """
         Predicts outputs using the model for the provided target indices.
-
-        This method applies the trained model to generate predictions for specified target
-        indices. It can return the results as a pandas DataFrame or as a numpy array, based
-        on the `as_df` parameter.
-
-        Parameters
-        ----------
-        idx_targets : array-like, pandas.DataFrame, pandas.Series, or list
-            The indices for which predictions are required. Can be in various formats including
-            an array, DataFrame, Series, or a list of tuples.
-        as_df : bool, optional
-            If True, returns the predictions as a pandas DataFrame. If False, returns predictions
-            as a numpy array. Default is True.
-        output_idx : int, optional
-            The index of the output to return, in case the model has multiple outputs. Default is 0.
-        idx_target_names : list of str, optional
-            Names for the target indices, used when `idx_targets` is a list of tuples. If None,
-            uses names from the training data's source index.
-
-        Returns
-        -------
-        pandas.DataFrame or numpy.ndarray
-            The predicted values. The format depends on the `as_df` parameter.
-
-        Raises
-        ------
-        ValueError
-            If no model has been trained yet, or if an invalid `output_idx` is provided.
-
-        Notes
-        -----
-        The method assumes that the model and the necessary data processing steps are already
-        properly set up and trained.
         """
         if self._last_train_results is None:
             raise ValueError("No model trained yet.")
@@ -421,9 +268,8 @@ class SCAPE:
             data_source_columns=self._last_train_results["data_source_columns"],
             join_on_index=idx,
         )
-        inputs = [
-            feats[self.setup["input_mapping"][name]] for name in self.model.input_names
-        ]
+        input_names = list(self.setup["input_mapping"].keys())
+        inputs = [feats[self.setup["input_mapping"][name]] for name in input_names]
         preds = self.model.predict(inputs)
         if isinstance(preds, list):
             preds = preds[output_idx]
@@ -637,9 +483,7 @@ def create_model(config):
         outputs=config["outputs"],
         hidden_layer_sizes=config["decoder_hidden_layer_sizes"],
         conditional_input_structure=config["conditional_decoder_input_structure"],
-        conditional_input_hidden_layer_sizes=config[
-            "conditional_decoder_input_hidden_sizes"
-        ],
+        conditional_input_hidden_layer_sizes=config["conditional_decoder_input_hidden_sizes"],
         dropout=dropout,
         input_noise=noise,
     )
@@ -660,7 +504,9 @@ def predict(idx_targets, models, as_df=True, output_idx=0):
             data_source_columns=res["data_source_columns"],
             join_on_index=idx_targets.index,
         )
-        inputs = [feats[data["input_mapping"][name]] for name in m.input_names]
+        # Use the input mapping from data rather than m.input_names
+        input_names = list(data["input_mapping"].keys())
+        inputs = [feats[data["input_mapping"][name]] for name in input_names]
         preds = m.predict(inputs)
         if isinstance(preds, list):
             preds = preds[output_idx]
