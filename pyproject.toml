@@ -15,6 +15,7 @@ dependencies = [
     "pandas>=1.5.3",
     "scikit-learn>=1.2.2",
     "fastparquet>=2023.10.1",
+    "keras>=3.6",
 ]
 
 [tool.pdm.dev-dependencies]
