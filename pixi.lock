@@ -1822,8 +1822,8 @@ packages:
   requires_python: '>=3.8.0'
 - pypi: ./
   name: scape
-  version: 0.1.1
-  sha256: 27613edadf38493721134a9d7fbdfc48c8000578b9c81f19f642845a40428ddd
+  version: 0.1.2
+  sha256: d3ffa9de34c519a255b89498b01987171227c86fba857b3a51bf0207ebf224ad
   requires_dist:
   - jax
   - jaxlib

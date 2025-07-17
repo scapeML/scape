@@ -60,6 +60,28 @@ For example, in order to leave Belinostat out as a drug for cross-validation (us
 python -m scape train --n-genes 64 --cv-drug Belinostat --output-dir models de_train.parquet lfc_train.parquet
 ```
 
+### Development and Testing
+
+ScAPE uses [pixi](https://pixi.sh/) for dependency management. To set up the development environment:
+
+```bash
+# Install dependencies
+pixi install
+
+# Activate development environment
+pixi shell -e dev
+
+# Run tests (requires JAX backend)
+KERAS_BACKEND=jax pixi run -e dev test
+
+# Run specific test file with verbose output
+KERAS_BACKEND=jax pixi run -e dev test tests/test_multitask.py -v
+
+# Run linting and formatting
+pixi run lint
+pixi run format
+```
+
 
 ## Interpreting error plots
 
