@@ -1,7 +1,7 @@
 [project]
 name = "scape"
-description = ""
-version = "0.1.1"
+description = "Single-cell Analysis of Perturbational Effects - A neural network model for predicting drug perturbation effects on peripheral blood mononuclear cells"
+version = "0.1.2"
 authors = [
     { name = "Pablo Rodriguez-Mier", email = "pablo.rodriguez.mier@gmail.com" },
     { name = "Martin Garrido Rodriguez-Cordoba", email = "mgrcprof@gmail.com" },
@@ -9,21 +9,67 @@ authors = [
 requires-python = ">=3.9"
 readme = "README.md"
 license = { text = "MIT" }
+keywords = ["single-cell", "bioinformatics", "machine-learning", "neural-networks", "drug-discovery", "jax", "keras"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
 dependencies = [
-    "tensorflow-io-gcs-filesystem>=0.31.0",
-    "tensorflow>=2.14.0",
+    "jax",
+    "jaxlib",
     "pandas>=1.5.3",
     "scikit-learn>=1.2.2",
     "fastparquet>=2023.10.1",
     "keras>=3.6",
 ]
 
-[tool.pdm.dev-dependencies]
-lint = ["black>=23.11.0", "flake8>=6.1.0"]
-test = ["pytest>=7.4.3"]
+[project.scripts]
+scape = "scape.__main__:main"
 
-[tool.pdm.scripts]
-scape = { call = "scape.__main__:main" }
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.pdm]
-excludes = ["notebooks/**"]
+[tool.setuptools.packages.find]
+exclude = ["models*", "_data*", "tests*", "docs*"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.9,<3.13"
+
+[tool.pixi.pypi-dependencies]
+scape = { path = ".", editable = true }
+
+[tool.pixi.feature.dev.pypi-dependencies]
+black = ">=23.11.0"
+flake8 = ">=6.1.0"
+pytest = ">=7.4.3"
+build = "*"
+
+[tool.pixi.tasks]
+scape = { cmd = "python -m scape", env = { KERAS_BACKEND = "jax" } }
+lint = "flake8 scape"
+format = "black scape"
+test = "pytest"
+build = "uv build"
+build-wheel = "uv build --wheel"
+build-sdist = "uv build --sdist"
+publish = "uv publish"
+publish-test = "uv publish --publish-url https://test.pypi.org/legacy/"
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }

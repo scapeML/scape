@@ -282,6 +282,11 @@ class SCAPE:
 
 
 def checkpoint(filepath, monitor="val_loss"):
+    # When save_weights_only=True, filepath must end with .weights.h5
+    if not filepath.endswith('.weights.h5'):
+        # Replace the extension with .weights.h5
+        filepath = filepath.rsplit('.', 1)[0] + '.weights.h5'
+    
     checkpoint = keras.callbacks.ModelCheckpoint(
         filepath=filepath,
         monitor=monitor,
