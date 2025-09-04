@@ -5,7 +5,7 @@
 <h1 align="center">ScAPE: Single-cell Analysis of Perturbational Effects</h1>
 
 <p align="center">
-  <strong>Predict drug perturbation effects on single-cell gene expression</strong>
+  <strong>A baseline ML model to predict cell responses to drug perturbations</strong>
 </p>
 
 <p align="center">
