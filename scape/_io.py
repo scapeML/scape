@@ -7,7 +7,7 @@ import tempfile
 import requests
 
 def download_from_zenodo(target_dir, cache_dir = '_data'):
-    if os.path.exists(target_dir):
+    if os.path.exists(target_dir + '/_data'):
         print(f"Target directory {target_dir} already exists. Skipping download.")
         return
     url = 'https://zenodo.org/records/10617221/files/scape-data.zip?download=1'
