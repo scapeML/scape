@@ -20,7 +20,6 @@ def download_from_zenodo(target_dir, cache_dir = '_data'):
     else:
         raise ValueError(f"Failed to download file from Zenodo: {response.status_code}")
 
-
 def compress(file_path, zip_file_path=None, delete=False):
     if not os.path.isfile(file_path):
         raise FileNotFoundError(f"The file {file_path} does not exist.")
