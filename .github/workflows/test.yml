@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'  # speeds up installs
 
       - name: Cache _data directory
         uses: actions/cache@v4
@@ -28,18 +29,39 @@ jobs:
             scape-data-${{ runner.os }}-
 
       - name: Install package
-        run: pip install .
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
 
       - name: Run test code
+        shell: bash
         run: |
-          python -c "
-import scape
-scape.io.download_from_zenodo(target_dir = '.')
-result = scape.api.train(
-    de_file='_data/de_train.parquet',
-    lfc_file='_data/lfc_train.parquet',
-    cv_drug='Belinostat',
-    n_genes=64
-)
-scape.util.plot_result(result._last_train_results)
-"
+          python - <<'PY'
+          import matplotlib
+          matplotlib.use('Agg')  # headless for CI
+          import matplotlib.pyplot as plt
+
+          import scape
+
+          # download data (cached in subsequent runs)
+          scape.io.download_from_zenodo(target_dir='.')
+
+          # train
+          result = scape.api.train(
+              de_file='_data/de_train.parquet',
+              lfc_file='_data/lfc_train.parquet',
+              cv_drug='Belinostat',
+              n_genes=64
+          )
+
+          # plot and save so CI has an artifact, not a GUI
+          scape.util.plot_result(result._last_train_results)
+          plt.tight_layout()
+          plt.savefig('results.png', dpi=150)
+          PY
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scape-results
+          path: results.png
