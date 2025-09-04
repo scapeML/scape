@@ -4,6 +4,21 @@ import os
 import zipfile
 import lzma
 import tempfile
+import requests
+
+def download_from_zenodo(target_dir, cache_dir = '_data'):
+    if os.path.exists(target_dir):
+        print(f"Target directory {target_dir} already exists. Skipping download.")
+        return
+    url = 'https://zenodo.org/records/10617221/files/scape-data.zip?download=1'
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(os.path.join(target_dir, "scape-data.zip"), "wb") as f:
+            f.write(response.content)
+        with zipfile.ZipFile(os.path.join(target_dir, "scape-data.zip"), 'r') as zip_ref:
+            zip_ref.extractall(target_dir)
+    else:
+        raise ValueError(f"Failed to download file from Zenodo: {response.status_code}")
 
 
 def compress(file_path, zip_file_path=None, delete=False):

@@ -2,6 +2,7 @@ import os
 # Set JAX backend for Keras before any imports
 os.environ.setdefault('KERAS_BACKEND', 'jax')
 
+import scape._api as api
 import scape._model as model
 import scape._losses as losses
 import scape._io as io

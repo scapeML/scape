@@ -1,0 +1,45 @@
+name: Run ScAPE Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Cache _data directory
+        uses: actions/cache@v4
+        with:
+          path: _data
+          key: scape-data-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            scape-data-${{ runner.os }}-
+
+      - name: Install package
+        run: pip install .
+
+      - name: Run test code
+        run: |
+          python -c "
+import scape
+scape.io.download_from_zenodo(target_dir = '.')
+result = scape.api.train(
+    de_file='_data/de_train.parquet',
+    lfc_file='_data/lfc_train.parquet',
+    cv_drug='Belinostat',
+    n_genes=64
+)
+scape.util.plot_result(result._last_train_results)
+"

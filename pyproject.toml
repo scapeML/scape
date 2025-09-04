@@ -31,6 +31,8 @@ dependencies = [
     "scikit-learn>=1.2.2",
     "fastparquet>=2023.10.1",
     "keras>=3.6",
+    "matplotlib",
+    "requests"
 ]
 
 [project.scripts]

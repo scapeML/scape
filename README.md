@@ -32,16 +32,19 @@ pip install git+https://github.com/scapeML/scape.git
 ```python
 import scape
 
+# data from zenodo can be downloaded via
+scape.io.download_from_zenodo(target_dir = ".")
+
 # Train model with drug cross-validation
-result = scape.train(
-    de_file="de_train.parquet",
-    lfc_file="lfc_train.parquet", 
+result = scape.api.train(
+    de_file="_data/de_train.parquet",
+    lfc_file="_data/lfc_train.parquet", 
     cv_drug="Belinostat",
     n_genes=64
 )
 
 # Visualize performance vs baselines
-scape.plot_result(result)
+scape.util.plot_result(result._last_train_results)
 ```
 
 ## 📋 Overview
@@ -75,7 +78,7 @@ Key design choices:
 
 ```bash
 # Command line
-python -m scape train --n-genes 64 --cv-drug Belinostat de_train.parquet lfc_train.parquet
+python -m scape train --n-genes 64 --cv-drug Belinostat _data/de_train.parquet _data/lfc_train.parquet
 
 # Python API
 import scape

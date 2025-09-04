@@ -105,37 +105,18 @@ def main():
 
     # If the command was train, train the model
     if parser.parse_args().command == "train":
-        train(args)
-
-
-def train(args):
-    # Read the files
-    df_de = scape.io.load_slogpvals(args.slogpval)
-    print(f"DE shape: {df_de.shape}")
-    df_lfc = scape.io.load_lfc(args.lfc)
-    print(f"LFC shape: {df_lfc.shape}")
-    val_cells = [args.cv_cell] if args.cv_cell else None
-    val_drugs = [args.cv_drug] if args.cv_drug else None
-    print(f"Training model with {args.n_genes} genes")
-    print(f"Validation cell(s): {val_cells}")
-    print(f"Validation drug(s): {val_drugs}")
-    # Create a default model
-    model = scape.model.create_default_model(args.n_genes, df_de, df_lfc)
-    top_genes = top_genes = scape.util.select_top_variable([df_de], k=args.n_genes)
-    model.train(
-        val_cells=val_cells,
-        val_drugs=val_drugs,
-        output_data="slogpval",
-        callbacks="default",
-        input_columns=top_genes,
-        optimizer=None,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        output_folder=args.output_dir,
-        config_file_name=f"{args.config_name}.pkl",
-        model_file_name=f"{args.model_name}.keras",
-        baselines=["zero", "slogpval_drug"]
-    )
+        scape.api.train(
+            de_file=args.slogpval,
+            lfc_file=args.lfc,
+            n_genes=args.n_genes,
+            output_dir=args.output_dir,
+            cv_cell=args.cv_cell,
+            cv_drug=args.cv_drug,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            config_name=args.config_name,
+            model_name=args.model_name
+        )
 
 
 if __name__ == "__main__":
