@@ -49,7 +49,7 @@ scape.util.plot_result(result._last_train_results)
 
 ## 📋 Overview
 
-ScAPE is a lightweight neural network (~9.6M parameters) that predicts differential gene expression in response to drug perturbations. Built with **Keras 3** for multi-backend support (TensorFlow, JAX, PyTorch).
+ScAPE is a lightweight neural network (~9.6M parameters for the single-task version) that predicts differential gene expression in response to drug perturbations. Built with **Keras 3** for multi-backend support (TensorFlow, JAX, PyTorch).
 
 ### Key Features
 
