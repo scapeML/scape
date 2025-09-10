@@ -200,11 +200,15 @@ pixi run format
 ## 📖 Citation
 
 ```bibtex
-@misc{rodriguezmier24scape,
-  author = {Rodriguez-Mier, Pablo and Garrido-Rodriguez, Martin},
-  title = {ScAPE: Single-cell Analysis of Perturbational Effects},
-  year = {2024},
-  url = {https://github.com/scapeML/scape}
+@article {scape2025perturb,
+	author = {Romero-Tapiador, Sergio and Rodriguez-Mier, Pablo and Garrido-Rodriguez, Martin and Tolosana, Ruben and Morales, Aythami and Saez-Rodriguez, Julio},
+	title = {ScAPE: A lightweight multitask learning baseline method to predict transcriptomic responses to perturbations},
+	year = {2025},
+	doi = {10.1101/2025.09.08.674873},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2025/09/09/2025.09.08.674873},
+	eprint = {https://www.biorxiv.org/content/early/2025/09/09/2025.09.08.674873.full.pdf},
+	journal = {bioRxiv}
 }
 ```
 
