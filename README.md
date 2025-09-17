@@ -67,10 +67,6 @@ The model uses median-based feature engineering: for each drug and cell type, we
 </p>
 Key design choices:
 
-- **Dual conditioning**: Cell features are used in both encoder and decoder (similar to CVAEs)
-- **Non-probabilistic**: After testing VAE variants, we found a simpler deterministic NN performed equally well.
-- **Multi-source features**: Combines signed log p-values and log fold changes for richer representations
-
 
 ## 💻 Usage
 
